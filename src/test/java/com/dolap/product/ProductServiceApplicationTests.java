@@ -1,4 +1,4 @@
-package com.dolap.product.productservice;
+package com.dolap.product;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

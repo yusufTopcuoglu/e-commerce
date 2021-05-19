@@ -1,4 +1,4 @@
-package com.dolap.product.productservice;
+package com.dolap.product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
