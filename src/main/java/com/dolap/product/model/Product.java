@@ -1,5 +1,6 @@
 package com.dolap.product.model;
 
+import com.dolap.product.strings.ValidationMessages;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -21,7 +22,7 @@ public class Product {
 	private Long id;
 
 	@Column
-	@NotBlank(message = "Name is mandatory for a product")
+	@NotBlank(message = ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE)
 	private String name;
 
 	@Column
@@ -29,8 +30,8 @@ public class Product {
 	private String category;
 
 	@Column
-	@NotNull
-	@Min(value = 0, message = "price must be a non negative value")
+	@NotNull(message = ValidationMessages.NULL_PRICE_VALIDATION_MESSAGE)
+	@Min(value = 0, message = ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE)
 	private Double price;
 
 	@Column

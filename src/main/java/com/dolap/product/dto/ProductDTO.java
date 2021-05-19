@@ -1,5 +1,6 @@
 package com.dolap.product.dto;
 
+import com.dolap.product.strings.ValidationMessages;
 import lombok.*;
 
 import javax.validation.constraints.Min;
@@ -11,14 +12,14 @@ import javax.validation.constraints.NotNull;
 @Getter @Setter
 @Builder
 public class ProductDTO {
-	@NotBlank(message = "Name is mandatory for a product")
+	@NotBlank(message = ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE)
 	private String name;
 
 	@NotNull
 	private String category;
 
-	@NotNull(message = "price is mandatory for a product")
-	@Min(value = 0, message = "price must be a non negative value")
+	@NotNull(message = ValidationMessages.NULL_PRICE_VALIDATION_MESSAGE)
+	@Min(value = 0, message = ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE)
 	private Double price;
 
 	@NotNull
