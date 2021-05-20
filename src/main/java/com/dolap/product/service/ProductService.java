@@ -18,7 +18,7 @@ public class ProductService {
 
 	private final ProductRepository productRepository;
 
-	public ProductDTO createAndSaveProduct(ProductDTO productDTO) {
+	public Product createAndSaveProduct(ProductDTO productDTO) {
 		if (productDTO == null || productDTO.getPrice() == null || productDTO.getCategory() == null || productDTO
 				.getImageLink() == null || productDTO.getName() == null) {
 			log.warn(ValidationMessages.NULL_PRODUCT_ATTRIBUTE_EXCEPTION);
@@ -37,7 +37,6 @@ public class ProductService {
 		Product product = Product.builder().name(productDTO.getName()).price(productDTO.getPrice())
 				.imageLink(productDTO.getImageLink()).category(productDTO.getCategory()).build();
 		log.info("creating and saving a new product : {}", product);
-		productRepository.save(product);
-		return productDTO;
+		return productRepository.save(product);
 	}
 }

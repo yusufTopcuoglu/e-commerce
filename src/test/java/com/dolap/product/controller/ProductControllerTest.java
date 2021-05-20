@@ -2,6 +2,7 @@ package com.dolap.product.controller;
 
 import com.dolap.product.dto.ErrorDTO;
 import com.dolap.product.dto.ProductDTO;
+import com.dolap.product.model.Product;
 import com.dolap.product.service.ProductService;
 import com.dolap.product.strings.ValidationMessages;
 import com.google.gson.Gson;
@@ -30,12 +31,12 @@ class ProductControllerTest {
 
 	@Test
 	public void createProductTest_Successful() throws Exception {
-		ProductDTO productDTO = ProductDTO.builder().category("test_catagory").price(5.0).name("test_name")
+		Product product = Product.builder().category("test_catagory").price(5.0).name("test_name")
 				.imageLink("test_link").build();
-
+		ProductDTO productDTO = ProductDTO.fromProduct(product);
 		String productJSON = productToJson(productDTO);
 
-		Mockito.when(productService.createAndSaveProduct(Mockito.any())).thenReturn(productDTO);
+		Mockito.when(productService.createAndSaveProduct(Mockito.any())).thenReturn(product);
 
 		this.mockMvc
 				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
