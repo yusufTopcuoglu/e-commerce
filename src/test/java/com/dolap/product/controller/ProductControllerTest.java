@@ -2,6 +2,7 @@ package com.dolap.product.controller;
 
 import com.dolap.product.dto.ErrorDTO;
 import com.dolap.product.dto.ProductDTO;
+import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.model.Product;
 import com.dolap.product.service.ProductService;
 import com.dolap.product.strings.ValidationMessages;
@@ -31,7 +32,7 @@ class ProductControllerTest {
 
 	@Test
 	public void createProductTest_Successful() throws Exception {
-		Product product = Product.builder().category("test_catagory").price(5.0).name("test_name")
+		Product product = Product.builder().category(ProductCategory.HOME).price(5.0).name("test_name")
 				.imageLink("test_link").build();
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
 		String productJSON = productToJson(productDTO);
@@ -45,7 +46,7 @@ class ProductControllerTest {
 
 	@Test
 	public void createProductTest_NegativePrice_BadRequest() throws Exception {
-		ProductDTO productDTO = ProductDTO.builder().category("test_catagory").price(-1.0).name("test_name")
+		ProductDTO productDTO = ProductDTO.builder().category(ProductCategory.CLOTHE).price(-1.0).name("test_name")
 				.imageLink("test_link").build();
 
 		String productJSON = productToJson(productDTO);
@@ -64,7 +65,7 @@ class ProductControllerTest {
 
 	@Test
 	public void createProductTest_BlankName_BadRequest() throws Exception {
-		ProductDTO productDTO = ProductDTO.builder().category("test_catagory").price(3.0).name("")
+		ProductDTO productDTO = ProductDTO.builder().category(ProductCategory.CLOTHE).price(3.0).name("")
 				.imageLink("test_link").build();
 
 		String productJSON = productToJson(productDTO);

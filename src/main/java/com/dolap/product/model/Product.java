@@ -1,12 +1,10 @@
 package com.dolap.product.model;
 
+import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.strings.ValidationMessages;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,7 +25,8 @@ public class Product {
 
 	@Column
 	@NotNull
-	private String category;
+	@Enumerated(EnumType.STRING)
+	private ProductCategory category;
 
 	@Column
 	@NotNull(message = ValidationMessages.NULL_PRICE_VALIDATION_MESSAGE)

@@ -1,5 +1,6 @@
 package com.dolap.product.dto;
 
+import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.model.Product;
 import com.dolap.product.strings.ValidationMessages;
 import lombok.*;
@@ -18,7 +19,7 @@ public class ProductDTO {
 	private String name;
 
 	@NotNull
-	private String category;
+	private ProductCategory category;
 
 	@NotNull(message = ValidationMessages.NULL_PRICE_VALIDATION_MESSAGE)
 	@Min(value = 0, message = ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE)

@@ -1,6 +1,7 @@
 package com.dolap.product.service;
 
 import com.dolap.product.dto.ProductDTO;
+import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.exception.BlankNameException;
 import com.dolap.product.exception.NegativePriceException;
 import com.dolap.product.exception.NullProductAttributeException;
@@ -30,7 +31,7 @@ class ProductServiceTest {
 	@Test
 	void createAndSaveProduct_Successful() {
 		Product product = Product.builder().name("test_name").imageLink("test_link").price(3.0)
-				.category("test_category").build();
+				.category(ProductCategory.HEALTH).build();
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
 		when(productRepository.save(any())).thenReturn(product);
 
@@ -52,7 +53,7 @@ class ProductServiceTest {
 	@Test
 	void createAndSaveProduct_NegativePrice_ThrowsNegativePriceException() {
 		Product product = Product.builder().name("test_name").imageLink("test_link").price(-1.0)
-				.category("test_category").build();
+				.category(ProductCategory.CLOTHE).build();
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
 		Assertions.assertThrows(NegativePriceException.class, () -> productService.createAndSaveProduct(productDTO));
 	}
@@ -60,7 +61,7 @@ class ProductServiceTest {
 	@Test
 	void createAndSaveProduct_BlankName_ThrowsBlankNameException() {
 		Product product = Product.builder().name("").imageLink("test_link").price(3.0)
-				.category("test_category").build();
+				.category(ProductCategory.ELECTRONIC).build();
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
 		Assertions.assertThrows(BlankNameException.class, () -> productService.createAndSaveProduct(productDTO));
 	}
