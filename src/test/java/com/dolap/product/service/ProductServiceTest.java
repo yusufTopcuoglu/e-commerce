@@ -1,10 +1,9 @@
 package com.dolap.product.service;
 
 import com.dolap.product.dto.ProductDTO;
+import com.dolap.product.dto.ProductRequestDTO;
 import com.dolap.product.enums.ProductCategory;
-import com.dolap.product.exception.BlankNameException;
-import com.dolap.product.exception.NegativePriceException;
-import com.dolap.product.exception.NullProductAttributeException;
+import com.dolap.product.exception.*;
 import com.dolap.product.model.Product;
 import com.dolap.product.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +12,9 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,4 +67,42 @@ class ProductServiceTest {
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
 		Assertions.assertThrows(BlankNameException.class, () -> productService.createAndSaveProduct(productDTO));
 	}
+
+	@Test
+	void getProductOfCategoryWithPageNumber_NegativePageNumber_NegativePageNumberException() {
+		Assertions.assertThrows(NegativePageIndexException.class, () -> productService
+				.getProductOfCategoryWithPageNumber(
+						ProductRequestDTO.builder().page(-1).productCategory(ProductCategory.HOME).count(1).build()));
+	}
+
+	@Test
+	void getProductOfCategoryWithPageNumber_NullProductRequest_NullProductRequestAttributeException() {
+		Assertions.assertThrows(NullProductRequestAttributeException.class, () -> productService
+				.getProductOfCategoryWithPageNumber(null));
+
+		Assertions.assertThrows(NullProductRequestAttributeException.class, () -> productService
+				.getProductOfCategoryWithPageNumber(ProductRequestDTO.builder().page(1).count(1).build()));
+	}
+
+	@Test
+	void getProductOfCategoryWithPageNumber_InvalidProductCount_InvalidProductCountException() {
+		Assertions.assertThrows(InvalidProductCountException.class, () -> productService
+				.getProductOfCategoryWithPageNumber(
+						ProductRequestDTO.builder().page(0).productCategory(ProductCategory.HOME).count(0).build()));
+	}
+
+	@Test
+	void getProductOfCategoryWithPageNumber_Successful() {
+		List<Product> products = Arrays.asList(new Product(1L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
+											   new Product(2L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
+											   new Product(3L, "test_name", ProductCategory.HOME, 3.0, "tet_link"));
+
+		when(productRepository.findAllByCategory(any(), any())).thenReturn(products);
+
+		List<Product> actualProducts = productService.getProductOfCategoryWithPageNumber(
+				ProductRequestDTO.builder().page(1).productCategory(ProductCategory.HOME).count(3).build());
+
+		assertEquals(products, actualProducts);
+	}
+
 }

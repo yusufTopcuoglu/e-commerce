@@ -1,21 +1,23 @@
 package com.dolap.product.service;
 
 import com.dolap.product.dto.ProductDTO;
-import com.dolap.product.exception.BlankNameException;
-import com.dolap.product.exception.NegativePriceException;
-import com.dolap.product.exception.NullProductAttributeException;
+import com.dolap.product.dto.ProductRequestDTO;
+import com.dolap.product.exception.*;
 import com.dolap.product.model.Product;
 import com.dolap.product.repository.ProductRepository;
 import com.dolap.product.strings.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Log4j2(topic = "product_service")
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-
 	private final ProductRepository productRepository;
 
 	public Product createAndSaveProduct(ProductDTO productDTO) {
@@ -38,5 +40,19 @@ public class ProductService {
 				.imageLink(productDTO.getImageLink()).category(productDTO.getCategory()).build();
 		log.info("creating and saving a new product : {}", product);
 		return productRepository.save(product);
+	}
+
+	public List<Product> getProductOfCategoryWithPageNumber(ProductRequestDTO productRequest) {
+		if (productRequest == null || productRequest.getProductCategory() == null) {
+			throw new NullProductRequestAttributeException();
+		}
+		if (productRequest.getPage() < 0) {
+			throw new NegativePageIndexException();
+		}
+		if (productRequest.getCount() < 1) {
+			throw new InvalidProductCountException();
+		}
+		Pageable pageable = PageRequest.of(productRequest.getPage(), productRequest.getCount());
+		return productRepository.findAllByCategory(productRequest.getProductCategory(), pageable);
 	}
 }
