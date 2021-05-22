@@ -41,27 +41,30 @@ class ProductControllerTest {
 
 	@Test
 	public void createProductTest_Successful() throws Exception {
-		Product product = Product.builder().category(ProductCategory.HOME).price(5.0).name("test_name")
+		Product product = Product.builder().id(1L).category(ProductCategory.HOME).price(5.0).name("test_name")
 				.imageLink("test_link").build();
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
-		String productJSON = productToJson(productDTO);
+
+		String productJSON = objectToJson(product);
+		String productDTOJSON = objectToJson(productDTO);
 
 		when(productService.createAndSaveProduct(Mockito.any())).thenReturn(product);
 
 		this.mockMvc
-				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
+				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productDTOJSON))
 				.andExpect(status().isCreated()).andExpect(content().string(productJSON));
 	}
 
 	@Test
 	public void createProductTest_NegativePrice_BadRequest() throws Exception {
-		ProductDTO productDTO = ProductDTO.builder().category(ProductCategory.CLOTHE).price(-1.0).name("test_name")
+		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(-1.0).name("test_name")
 				.imageLink("test_link").build();
+		ProductDTO productDTO = ProductDTO.fromProduct(product);
 
-		String productJSON = productToJson(productDTO);
+		String productDTOJSON = objectToJson(productDTO);
 
 		MvcResult mvcResult = this.mockMvc
-				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
+				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productDTOJSON))
 				.andExpect(status().isBadRequest()).andReturn();
 
 		String responseString = mvcResult.getResponse().getContentAsString();
@@ -74,10 +77,10 @@ class ProductControllerTest {
 
 	@Test
 	public void createProductTest_BlankName_BadRequest() throws Exception {
-		ProductDTO productDTO = ProductDTO.builder().category(ProductCategory.CLOTHE).price(3.0).name("")
+		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(3.0).name("")
 				.imageLink("test_link").build();
 
-		String productJSON = productToJson(productDTO);
+		String productJSON = objectToJson(product);
 
 		MvcResult mvcResult = this.mockMvc
 				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
@@ -123,8 +126,8 @@ class ProductControllerTest {
 				.andExpect(content().json(productDTOSJson));
 	}
 
-	private String productToJson(ProductDTO productDTO) {
+	private String objectToJson(Object product) {
 		Gson gson = new Gson();
-		return gson.toJson(productDTO);
+		return gson.toJson(product);
 	}
 }
