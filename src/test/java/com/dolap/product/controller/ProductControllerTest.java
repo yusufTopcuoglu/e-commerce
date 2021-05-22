@@ -112,7 +112,7 @@ class ProductControllerTest {
 	}
 
 	@Test
-	void getProductOfCategoryWithPageNumber() throws Exception {
+	void getProductOfCategoryWithPageNumber_Successful() throws Exception {
 		List<Product> productList = Arrays.asList(new Product(1L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
 												  new Product(2L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
 												  new Product(3L, "test_name", ProductCategory.HOME, 3.0, "tet_link"));
