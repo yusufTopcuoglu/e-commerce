@@ -3,8 +3,6 @@ package com.dolap.product;
 import com.dolap.product.dto.ProductDTO;
 import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.model.Product;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,21 +13,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.dolap.product.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class IntegrationTest {
-
-	private static final String CREATE_PRODUCT_URL = "/product/create";
-	private static final String REQUEST_PRODUCT_URL = "/product/{productCategory}/{page}/{count}";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -46,8 +39,7 @@ public class IntegrationTest {
 				.andExpect(status().isCreated()).andReturn();
 
 		String contentAsString = mvcResult.getResponse().getContentAsString();
-		Gson gson = new Gson();
-		Product savedProduct = gson.fromJson(contentAsString, Product.class);
+		Product savedProduct = objectFromJson(contentAsString, Product.class);
 
 		assertEquals(productDTO.getImageLink(), savedProduct.getImageLink());
 		assertEquals(productDTO.getPrice(), savedProduct.getPrice());
@@ -61,14 +53,12 @@ public class IntegrationTest {
 			throws Exception {
 		ProductCategory category = ProductCategory.ELECTRONIC;
 		int count = 2;
-		MvcResult mvcResult = this.mockMvc.perform(get(REQUEST_PRODUCT_URL, category, 1, count))
+		int page = 1;
+		MvcResult mvcResult = this.mockMvc.perform(getProductOfCategoryRequestBuilder(category, page, count))
 				.andExpect(status().isOk()).andReturn();
 
 		String contentAsString = mvcResult.getResponse().getContentAsString();
-		Gson gson = new Gson();
-		Type listOfProductObject = new TypeToken<ArrayList<Product>>() {}.getType();
-
-		List<Product> returnedProducts = gson.fromJson(contentAsString, listOfProductObject);
+		List<Product> returnedProducts = productListFromJson(contentAsString);
 
 		Assertions.assertTrue(returnedProducts.size() <= count);
 		for (Product returnedProduct : returnedProducts) {
@@ -76,8 +66,5 @@ public class IntegrationTest {
 		}
 	}
 
-	private String objectToJson(Object product) {
-		Gson gson = new Gson();
-		return gson.toJson(product);
-	}
+
 }

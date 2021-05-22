@@ -7,7 +7,6 @@ import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.model.Product;
 import com.dolap.product.service.ProductService;
 import com.dolap.product.strings.ValidationMessages;
-import com.google.gson.Gson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,10 +19,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static com.dolap.product.TestUtils.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,8 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 class ProductControllerTest {
 
-	private static final String CREATE_PRODUCT_URL = "/product/create";
-	private static final String REQUEST_PRODUCT_URL = "/product/{productCategory}/{page}/{count}";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -69,8 +65,7 @@ class ProductControllerTest {
 
 		String responseString = mvcResult.getResponse().getContentAsString();
 
-		Gson gson = new Gson();
-		ErrorDTO errorDTO = gson.fromJson(responseString, ErrorDTO.class);
+		ErrorDTO errorDTO = objectFromJson(responseString, ErrorDTO.class);
 
 		Assertions.assertTrue(errorDTO.getDetails().contains(ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE));
 	}
@@ -88,26 +83,35 @@ class ProductControllerTest {
 
 		String responseString = mvcResult.getResponse().getContentAsString();
 
-		Gson gson = new Gson();
-		ErrorDTO errorDTO = gson.fromJson(responseString, ErrorDTO.class);
+		ErrorDTO errorDTO = objectFromJson(responseString, ErrorDTO.class);
 
 		Assertions.assertTrue(errorDTO.getDetails().contains(ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE));
 	}
 
 	@Test
 	void getProductOfCategoryWithPageNumber_InvalidPageNumber_BadRequest() throws Exception {
-		this.mockMvc.perform(get(REQUEST_PRODUCT_URL, ProductCategory.CLOTHE, -1, 1)).andExpect(status().isBadRequest());
+		ProductCategory category = ProductCategory.CLOTHE;
+		int page = -1;
+		int count = 1;
+		this.mockMvc.perform(getProductOfCategoryRequestBuilder(category, page, count))
+				.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	void getProductOfCategoryWithPageNumber_InvalidProductCategory_BadRequest() throws Exception {
-		this.mockMvc.perform(get(REQUEST_PRODUCT_URL, "NOT_VALID_PRODUCT_CATEGORY", 5, 1))
+		String category = "NOT_VALID_PRODUCT_CATEGORY";
+		int page = 5;
+		int count = 1;
+		this.mockMvc.perform(getProductOfCategoryRequestBuilder(category, page, count))
 				.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	void getProductOfCategoryWithPageNumber_InvalidProductCount_BadRequest() throws Exception {
-		this.mockMvc.perform(get(REQUEST_PRODUCT_URL, ProductCategory.CLOTHE, 5, 0))
+		ProductCategory category = ProductCategory.CLOTHE;
+		int page = 5;
+		int count = 0;
+		this.mockMvc.perform(getProductOfCategoryRequestBuilder(category, page, count))
 				.andExpect(status().isBadRequest());
 	}
 
@@ -116,18 +120,14 @@ class ProductControllerTest {
 		List<Product> productList = Arrays.asList(new Product(1L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
 												  new Product(2L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
 												  new Product(3L, "test_name", ProductCategory.HOME, 3.0, "tet_link"));
-		List<ProductDTO> productDTOS = productList.stream().map(ProductDTO::fromProduct).collect(Collectors.toList());
-
 		when(productService.getProductOfCategoryWithPageNumber(Mockito.any(ProductRequestDTO.class)))
 				.thenReturn(productList);
-		Gson gson = new Gson();
-		String productDTOSJson = gson.toJson(productDTOS);
-		this.mockMvc.perform(get(REQUEST_PRODUCT_URL, ProductCategory.CLOTHE, 5, 3)).andExpect(status().isOk())
-				.andExpect(content().json(productDTOSJson));
-	}
+		String productsJson = objectToJson(productList);
 
-	private String objectToJson(Object product) {
-		Gson gson = new Gson();
-		return gson.toJson(product);
+		ProductCategory category = ProductCategory.CLOTHE;
+		int page = 5;
+		int count = 3;
+		this.mockMvc.perform(getProductOfCategoryRequestBuilder(category, page, count))
+				.andExpect(status().isOk()).andExpect(content().json(productsJson));
 	}
 }

@@ -31,7 +31,7 @@ public class ProductController {
 		return new ResponseEntity<>(product, HttpStatus.CREATED);
 	}
 
-	@GetMapping("product/{productCategory}/{page}/{count}")
+	@GetMapping("product")
 	private ResponseEntity<List<Product>> getProductOfCategoryWithPageNumber(
 			@Valid ProductRequestDTO productRequest) {
 		log.info("products of category : {} requested with page : {}, count {}", productRequest.getProductCategory(),
