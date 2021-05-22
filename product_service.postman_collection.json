@@ -1,0 +1,98 @@
+{
+	"info": {
+		"_postman_id": "32e527ee-cb60-4292-b314-08ac15c97fb7",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "create product",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"a\",\n    \"price\": 1,\n    \"category\": \"ELECTRONIC\",\n    \"imageLink\": \"https://cdn-gant.akinon.net/products/2020/08/12/22742/a0ea0087-aacf-4bb6-bc2d-d9eaaea57fb1_size1500x1875_quality90_cropCenter.jpg\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/product/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"product",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_product",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/product?productCategory=HOME&page=0&count=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"product"
+					],
+					"query": [
+						{
+							"key": "productCategory",
+							"value": "HOME"
+						},
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "count",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update product",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": 60,\n    \"name\": \"a\",\n    \"price\": 1,\n    \"category\": \"ELECTRONIC\",\n    \"imageLink\": \"https://cdn-gant.akinon.net/products/2020/08/12/22742/a0ea0087-aacf-4bb6-bc2d-d9eaaea57fb1_size1500x1875_quality90_cropCenter.jpg\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/product/update",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"product",
+						"update"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
