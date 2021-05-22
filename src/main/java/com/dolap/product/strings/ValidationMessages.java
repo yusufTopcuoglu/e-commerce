@@ -7,6 +7,8 @@ public class ValidationMessages {
 
 	public static final String BLANK_NAME_VALIDATION_MESSAGE = "Name is mandatory for a product";
 
+	public static final String UPDATING_PRODUCT_NOT_EXIST = "The updating product does not exists!";
+
 	public static final String NULL_PRICE_VALIDATION_MESSAGE = "Price is mandatory for a product";
 
 	public static final String NEGATIVE_PRICE_VALIDATION_MESSAGE = "Price must be a non negative value";

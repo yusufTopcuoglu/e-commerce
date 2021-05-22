@@ -31,9 +31,17 @@ public class ProductController {
 		return new ResponseEntity<>(product, HttpStatus.CREATED);
 	}
 
+	@PostMapping("product/update")
+	private ResponseEntity<Product> updateProduct(@Valid @RequestBody Product product) {
+		log.info("received post request to update product, id: {}, name: {}, price: {}, category: {}, imageLink: {}",
+				 product.getId(), product.getName(), product.getPrice(), product.getCategory(),
+				 product.getImageLink());
+		Product updatedProduct = productService.updateProduct(product);
+		return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+	}
+
 	@GetMapping("product")
-	private ResponseEntity<List<Product>> getProductOfCategoryWithPageNumber(
-			@Valid ProductRequestDTO productRequest) {
+	private ResponseEntity<List<Product>> getProductOfCategoryWithPageNumber(@Valid ProductRequestDTO productRequest) {
 		log.info("products of category : {} requested with page : {}, count {}", productRequest.getProductCategory(),
 				 productRequest.getPage(), productRequest.getCount());
 		List<Product> products = productService.getProductOfCategoryWithPageNumber(productRequest);

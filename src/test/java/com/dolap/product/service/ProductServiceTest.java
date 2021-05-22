@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,6 +70,52 @@ class ProductServiceTest {
 	}
 
 	@Test
+	void updateProduct_Successful() {
+		Product product = Product.builder().id(1L).name("test_name").imageLink("test_link").price(3.0)
+				.category(ProductCategory.HEALTH).build();
+		when(productRepository.save(any())).thenReturn(product);
+		when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+
+		Product savedProduct = productService.updateProduct(product);
+
+		assertEquals(product.getId(), savedProduct.getId());
+		assertEquals(product.getCategory(), savedProduct.getCategory());
+		assertEquals(product.getName(), savedProduct.getName());
+		assertEquals(product.getPrice(), savedProduct.getPrice());
+		assertEquals(product.getImageLink(), savedProduct.getImageLink());
+	}
+
+	@Test
+	void updateProduct_NotExistProduct_ThrowsUpdatingProductNotExistsException() {
+		Product product = Product.builder().id(1L).name("test_name").imageLink("test_link").price(3.0)
+				.category(ProductCategory.HEALTH).build();
+
+		when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
+		Assertions.assertThrows(UpdatingProductNotExistsException.class, () -> productService.updateProduct(product));
+	}
+
+	@Test
+	void updateProduct_NullProduct_ThrowsNullProductAttributeException() {
+		Assertions.assertThrows(NullProductAttributeException.class, () -> productService.updateProduct(null));
+		Assertions.assertThrows(NullProductAttributeException.class,
+								() -> productService.updateProduct(new Product()));
+	}
+
+	@Test
+	void updateProduct_NegativePrice_ThrowsNegativePriceException() {
+		Product product = Product.builder().id(1L).name("test_name").imageLink("test_link").price(-1.0)
+				.category(ProductCategory.CLOTHE).build();
+		Assertions.assertThrows(NegativePriceException.class, () -> productService.updateProduct(product));
+	}
+
+	@Test
+	void updateProduct_BlankName_ThrowsBlankNameException() {
+		Product product = Product.builder().id(1L).name("").imageLink("test_link").price(3.0)
+				.category(ProductCategory.ELECTRONIC).build();
+		Assertions.assertThrows(BlankNameException.class, () -> productService.updateProduct(product));
+	}
+
+	@Test
 	void getProductOfCategoryWithPageNumber_NegativePageNumber_NegativePageNumberException() {
 		Assertions.assertThrows(NegativePageIndexException.class, () -> productService
 				.getProductOfCategoryWithPageNumber(
@@ -77,8 +124,8 @@ class ProductServiceTest {
 
 	@Test
 	void getProductOfCategoryWithPageNumber_NullProductRequest_NullProductRequestAttributeException() {
-		Assertions.assertThrows(NullProductRequestAttributeException.class, () -> productService
-				.getProductOfCategoryWithPageNumber(null));
+		Assertions.assertThrows(NullProductRequestAttributeException.class,
+								() -> productService.getProductOfCategoryWithPageNumber(null));
 
 		Assertions.assertThrows(NullProductRequestAttributeException.class, () -> productService
 				.getProductOfCategoryWithPageNumber(ProductRequestDTO.builder().page(1).count(1).build()));

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Log4j2(topic = "product_service")
 @Service
@@ -39,6 +40,31 @@ public class ProductService {
 		Product product = Product.builder().name(productDTO.getName()).price(productDTO.getPrice())
 				.imageLink(productDTO.getImageLink()).category(productDTO.getCategory()).build();
 		log.info("creating and saving a new product : {}", product);
+		return productRepository.save(product);
+	}
+
+	public Product updateProduct(Product product) {
+		if (product == null || product.getPrice() == null || product.getCategory() == null || product
+				.getImageLink() == null || product.getName() == null || product.getId() == null) {
+			log.warn(ValidationMessages.NULL_PRODUCT_ATTRIBUTE_EXCEPTION);
+			throw new NullProductAttributeException();
+		}
+
+		if (product.getName().isEmpty()) {
+			log.warn(ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE);
+			throw new BlankNameException();
+		}
+		if (product.getPrice() < 0) {
+			log.warn(ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE);
+			throw new NegativePriceException();
+		}
+
+		Optional<Product> updatingProduct = productRepository.findById(product.getId());
+		if (!updatingProduct.isPresent()) {
+			throw new UpdatingProductNotExistsException();
+		}
+
+		log.info("updating the product : {}", product);
 		return productRepository.save(product);
 	}
 

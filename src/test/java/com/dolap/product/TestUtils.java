@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class TestUtils {
 
 	public static final String CREATE_PRODUCT_URL = "/product/create";
+	public static final String UPDATE_PRODUCT_URL = "/product/update";
 	public static final String REQUEST_PRODUCT_URL = "/product";
 
 	public static final String PRODUCT_CATEGORY_PARAM_NAME = "productCategory";

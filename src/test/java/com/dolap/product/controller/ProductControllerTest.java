@@ -4,12 +4,12 @@ import com.dolap.product.dto.ErrorDTO;
 import com.dolap.product.dto.ProductDTO;
 import com.dolap.product.dto.ProductRequestDTO;
 import com.dolap.product.enums.ProductCategory;
+import com.dolap.product.exception.UpdatingProductNotExistsException;
 import com.dolap.product.model.Product;
 import com.dolap.product.service.ProductService;
 import com.dolap.product.strings.ValidationMessages;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.dolap.product.TestUtils.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -44,7 +45,7 @@ class ProductControllerTest {
 		String productJSON = objectToJson(product);
 		String productDTOJSON = objectToJson(productDTO);
 
-		when(productService.createAndSaveProduct(Mockito.any())).thenReturn(product);
+		when(productService.createAndSaveProduct(any())).thenReturn(product);
 
 		this.mockMvc
 				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productDTOJSON))
@@ -52,7 +53,7 @@ class ProductControllerTest {
 	}
 
 	@Test
-	public void createProductTest_NegativePrice_BadRequest() throws Exception {
+	public void createProductTest_NegativePrice_PreconditionFailed() throws Exception {
 		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(-1.0).name("test_name")
 				.imageLink("test_link").build();
 		ProductDTO productDTO = ProductDTO.fromProduct(product);
@@ -61,7 +62,7 @@ class ProductControllerTest {
 
 		MvcResult mvcResult = this.mockMvc
 				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productDTOJSON))
-				.andExpect(status().isBadRequest()).andReturn();
+				.andExpect(status().isPreconditionFailed()).andReturn();
 
 		String responseString = mvcResult.getResponse().getContentAsString();
 
@@ -71,7 +72,7 @@ class ProductControllerTest {
 	}
 
 	@Test
-	public void createProductTest_BlankName_BadRequest() throws Exception {
+	public void createProductTest_BlankName_PreconditionFailed() throws Exception {
 		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(3.0).name("")
 				.imageLink("test_link").build();
 
@@ -79,7 +80,7 @@ class ProductControllerTest {
 
 		MvcResult mvcResult = this.mockMvc
 				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
-				.andExpect(status().isBadRequest()).andReturn();
+				.andExpect(status().isPreconditionFailed()).andReturn();
 
 		String responseString = mvcResult.getResponse().getContentAsString();
 
@@ -120,7 +121,7 @@ class ProductControllerTest {
 		List<Product> productList = Arrays.asList(new Product(1L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
 												  new Product(2L, "test_name", ProductCategory.HOME, 3.0, "tet_link"),
 												  new Product(3L, "test_name", ProductCategory.HOME, 3.0, "tet_link"));
-		when(productService.getProductOfCategoryWithPageNumber(Mockito.any(ProductRequestDTO.class)))
+		when(productService.getProductOfCategoryWithPageNumber(any(ProductRequestDTO.class)))
 				.thenReturn(productList);
 		String productsJson = objectToJson(productList);
 
@@ -130,4 +131,69 @@ class ProductControllerTest {
 		this.mockMvc.perform(getProductOfCategoryRequestBuilder(category, page, count))
 				.andExpect(status().isOk()).andExpect(content().json(productsJson));
 	}
+
+	@Test
+	public void updateProductTest_Successful() throws Exception {
+		Product product = Product.builder().id(1L).category(ProductCategory.HOME).price(5.0).name("test_name")
+				.imageLink("test_link").build();
+		String productJSON = objectToJson(product);
+
+		when(productService.updateProduct(any())).thenReturn(product);
+
+		this.mockMvc
+				.perform(post(UPDATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
+				.andExpect(status().isOk()).andExpect(content().string(productJSON));
+	}
+
+	@Test
+	public void updateProductTest_NegativePrice_PreconditionFailed() throws Exception {
+		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(-1.0).name("test_name")
+				.imageLink("test_link").build();
+		String productJSON = objectToJson(product);
+
+		MvcResult mvcResult = this.mockMvc
+				.perform(post(UPDATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
+				.andExpect(status().isPreconditionFailed()).andReturn();
+
+		String responseString = mvcResult.getResponse().getContentAsString();
+		ErrorDTO errorDTO = objectFromJson(responseString, ErrorDTO.class);
+
+		Assertions.assertTrue(errorDTO.getDetails().contains(ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE));
+	}
+
+	@Test
+	public void updateProductTest_NotExistProduct_PreconditionFailed() throws Exception {
+		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(5.0).name("test_name")
+				.imageLink("test_link").build();
+		String productJSON = objectToJson(product);
+
+		when(productService.updateProduct(any())).thenThrow(new UpdatingProductNotExistsException());
+
+		MvcResult mvcResult = this.mockMvc
+				.perform(post(UPDATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
+				.andExpect(status().isPreconditionFailed()).andReturn();
+
+		String responseString = mvcResult.getResponse().getContentAsString();
+		ErrorDTO errorDTO = objectFromJson(responseString, ErrorDTO.class);
+
+		Assertions.assertTrue(errorDTO.getDetails().contains(ValidationMessages.UPDATING_PRODUCT_NOT_EXIST));
+	}
+
+	@Test
+	public void updateProductTest_BlankName_PreconditionFailed() throws Exception {
+		Product product = Product.builder().id(1L).category(ProductCategory.CLOTHE).price(3.0).name("")
+				.imageLink("test_link").build();
+
+		String productJSON = objectToJson(product);
+
+		MvcResult mvcResult = this.mockMvc
+				.perform(post(UPDATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON_VALUE).content(productJSON))
+				.andExpect(status().isPreconditionFailed()).andReturn();
+
+		String responseString = mvcResult.getResponse().getContentAsString();
+
+		ErrorDTO errorDTO = objectFromJson(responseString, ErrorDTO.class);
+		Assertions.assertTrue(errorDTO.getDetails().contains(ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE));
+	}
+
 }

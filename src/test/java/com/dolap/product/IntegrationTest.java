@@ -3,6 +3,7 @@ package com.dolap.product;
 import com.dolap.product.dto.ProductDTO;
 import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.model.Product;
+import com.dolap.product.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.dolap.product.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +28,9 @@ public class IntegrationTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private ProductRepository productRepository;
 
 	@Test
 	@Transactional
@@ -49,6 +54,33 @@ public class IntegrationTest {
 
 	@Test
 	@Transactional
+	public void updateProduct_Successful_ShouldReturnUpdatedProduct() throws Exception {
+		Product product = Product.builder().id(1L).category(ProductCategory.HOME).price(5.0).name("test_name")
+				.imageLink("test_link").build();
+
+		Optional<Product> productFromDb = productRepository.findById(product.getId());
+		if (!productFromDb.isPresent()) {
+			product = productRepository.save(product);
+		}
+
+		String productJSON = objectToJson(product);
+
+		MvcResult mvcResult = this.mockMvc
+				.perform(post(UPDATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON).content(productJSON))
+				.andExpect(status().isOk()).andReturn();
+
+		String contentAsString = mvcResult.getResponse().getContentAsString();
+		Product updatedProduct = objectFromJson(contentAsString, Product.class);
+
+		assertEquals(product.getId(), updatedProduct.getId());
+		assertEquals(product.getImageLink(), updatedProduct.getImageLink());
+		assertEquals(product.getPrice(), updatedProduct.getPrice());
+		assertEquals(product.getName(), updatedProduct.getName());
+		assertEquals(product.getCategory(), updatedProduct.getCategory());
+	}
+
+	@Test
+	@Transactional
 	public void getProductOfCategoryWithPageNumber_Successful_ShouldReturnProductsOfSpecifiedCategory()
 			throws Exception {
 		ProductCategory category = ProductCategory.ELECTRONIC;
@@ -65,6 +97,5 @@ public class IntegrationTest {
 			Assertions.assertEquals(category, returnedProduct.getCategory());
 		}
 	}
-
 
 }
