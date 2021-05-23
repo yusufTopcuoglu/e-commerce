@@ -1,24 +1,28 @@
 package com.dolap.product.service;
 
-import com.dolap.product.dto.ProductDTO;
-import com.dolap.product.dto.ProductRequestDTO;
 import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.exception.*;
 import com.dolap.product.model.Product;
 import com.dolap.product.repository.ProductRepository;
+import com.dolap.product.request.CreateProductRequest;
+import com.dolap.product.request.GetProductOfCategoryRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.dolap.product.TestUtils.createProductRequestFromProduct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -35,10 +39,10 @@ class ProductServiceTest {
 	void createAndSaveProduct_Successful() {
 		Product product = Product.builder().name("test_name").imageLink("test_link").price(3.0)
 				.category(ProductCategory.HEALTH).build();
-		ProductDTO productDTO = ProductDTO.fromProduct(product);
+		CreateProductRequest createProductRequest = createProductRequestFromProduct(product);
 		when(productRepository.save(any())).thenReturn(product);
 
-		Product savedProduct = productService.createAndSaveProduct(productDTO);
+		Product savedProduct = productService.createAndSaveProduct(createProductRequest);
 
 		assertEquals(product.getCategory(), savedProduct.getCategory());
 		assertEquals(product.getName(), savedProduct.getName());
@@ -50,23 +54,25 @@ class ProductServiceTest {
 	void createAndSaveProduct_NullProduct_ThrowsNullProductAttributeException() {
 		Assertions.assertThrows(NullProductAttributeException.class, () -> productService.createAndSaveProduct(null));
 		Assertions.assertThrows(NullProductAttributeException.class,
-								() -> productService.createAndSaveProduct(new ProductDTO()));
+								() -> productService.createAndSaveProduct(new CreateProductRequest()));
 	}
 
 	@Test
 	void createAndSaveProduct_NegativePrice_ThrowsNegativePriceException() {
 		Product product = Product.builder().name("test_name").imageLink("test_link").price(-1.0)
 				.category(ProductCategory.CLOTHE).build();
-		ProductDTO productDTO = ProductDTO.fromProduct(product);
-		Assertions.assertThrows(NegativePriceException.class, () -> productService.createAndSaveProduct(productDTO));
+		CreateProductRequest createProductRequest = createProductRequestFromProduct(product);
+		Assertions.assertThrows(NegativePriceException.class, () -> productService.createAndSaveProduct(
+				createProductRequest));
 	}
 
 	@Test
 	void createAndSaveProduct_BlankName_ThrowsBlankNameException() {
 		Product product = Product.builder().name("").imageLink("test_link").price(3.0)
 				.category(ProductCategory.ELECTRONIC).build();
-		ProductDTO productDTO = ProductDTO.fromProduct(product);
-		Assertions.assertThrows(BlankNameException.class, () -> productService.createAndSaveProduct(productDTO));
+		CreateProductRequest createProductRequest = createProductRequestFromProduct(product);
+		Assertions.assertThrows(BlankNameException.class, () -> productService.createAndSaveProduct(
+				createProductRequest));
 	}
 
 	@Test
@@ -119,7 +125,7 @@ class ProductServiceTest {
 	void getProductOfCategoryWithPageNumber_NegativePageNumber_NegativePageNumberException() {
 		Assertions.assertThrows(NegativePageIndexException.class, () -> productService
 				.getProductOfCategoryWithPageNumber(
-						ProductRequestDTO.builder().page(-1).productCategory(ProductCategory.HOME).count(1).build()));
+						GetProductOfCategoryRequest.builder().page(-1).productCategory(ProductCategory.HOME).count(1).build()));
 	}
 
 	@Test
@@ -128,14 +134,14 @@ class ProductServiceTest {
 								() -> productService.getProductOfCategoryWithPageNumber(null));
 
 		Assertions.assertThrows(NullProductRequestAttributeException.class, () -> productService
-				.getProductOfCategoryWithPageNumber(ProductRequestDTO.builder().page(1).count(1).build()));
+				.getProductOfCategoryWithPageNumber(GetProductOfCategoryRequest.builder().page(1).count(1).build()));
 	}
 
 	@Test
 	void getProductOfCategoryWithPageNumber_InvalidProductCount_InvalidProductCountException() {
 		Assertions.assertThrows(InvalidProductCountException.class, () -> productService
 				.getProductOfCategoryWithPageNumber(
-						ProductRequestDTO.builder().page(0).productCategory(ProductCategory.HOME).count(0).build()));
+						GetProductOfCategoryRequest.builder().page(0).productCategory(ProductCategory.HOME).count(0).build()));
 	}
 
 	@Test
@@ -147,9 +153,23 @@ class ProductServiceTest {
 		when(productRepository.findAllByCategory(any(), any())).thenReturn(products);
 
 		List<Product> actualProducts = productService.getProductOfCategoryWithPageNumber(
-				ProductRequestDTO.builder().page(1).productCategory(ProductCategory.HOME).count(3).build());
+				GetProductOfCategoryRequest.builder().page(1).productCategory(ProductCategory.HOME).count(3).build());
 
 		assertEquals(products, actualProducts);
+	}
+
+	@Test
+	public void deleteProduct_ProductDoesNotExists_ThrowsDeletingProductNotExistsException() {
+		long productId = 3L;
+		doThrow(EmptyResultDataAccessException.class).when(productRepository).deleteById(productId);
+
+		assertThrows(DeletingProductNotExistsException.class, () -> productService.deleteProduct(productId));
+	}
+
+	@Test
+	public void deleteProduct_Successful() {
+		long productId = 3L;
+		productService.deleteProduct(productId);
 	}
 
 }

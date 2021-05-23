@@ -1,4 +1,4 @@
-package com.dolap.product.dto;
+package com.dolap.product.request;
 
 import com.dolap.product.enums.ProductCategory;
 import lombok.*;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ProductRequestDTO {
+public class GetProductOfCategoryRequest {
 
 	@NotNull
 	private ProductCategory productCategory;

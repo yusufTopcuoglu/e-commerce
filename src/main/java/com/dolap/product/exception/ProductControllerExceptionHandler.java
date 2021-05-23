@@ -1,6 +1,6 @@
 package com.dolap.product.exception;
 
-import com.dolap.product.dto.ErrorDTO;
+import com.dolap.product.reponse.ErrorResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +26,19 @@ public class ProductControllerExceptionHandler extends ResponseEntityExceptionHa
 		for(ObjectError error : ex.getBindingResult().getAllErrors()) {
 			details.add(error.getDefaultMessage());
 		}
-		ErrorDTO error = new ErrorDTO(ex.getMessage(), details);
+		ErrorResponse error = new ErrorResponse(ex.getMessage(), details);
 		return new ResponseEntity<>(error, HttpStatus.PRECONDITION_FAILED);
 	}
 
 	@ExceptionHandler(UpdatingProductNotExistsException.class)
-	public ResponseEntity<ErrorDTO> handleUpdatingProductNotExistsException(UpdatingProductNotExistsException ex) {
-		ErrorDTO error = new ErrorDTO(ex.getMessage(), Collections.singletonList(ex.getMessage()));
+	public ResponseEntity<ErrorResponse> handleUpdatingProductNotExistsException(UpdatingProductNotExistsException ex) {
+		ErrorResponse error = new ErrorResponse(ex.getMessage(), Collections.singletonList(ex.getMessage()));
+		return new ResponseEntity<>(error, HttpStatus.PRECONDITION_FAILED);
+	}
+
+	@ExceptionHandler(DeletingProductNotExistsException.class)
+	public ResponseEntity<ErrorResponse> handleDeletingProductNotExistsException(DeletingProductNotExistsException ex) {
+		ErrorResponse error = new ErrorResponse(ex.getMessage(), Collections.singletonList(ex.getMessage()));
 		return new ResponseEntity<>(error, HttpStatus.PRECONDITION_FAILED);
 	}
 }

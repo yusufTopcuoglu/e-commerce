@@ -1,6 +1,7 @@
 package com.dolap.product;
 
 import com.dolap.product.model.Product;
+import com.dolap.product.request.CreateProductRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -15,6 +16,7 @@ public class TestUtils {
 
 	public static final String CREATE_PRODUCT_URL = "/product/create";
 	public static final String UPDATE_PRODUCT_URL = "/product/update";
+	public static final String DELETE_PRODUCT_URL = "/product/delete";
 	public static final String REQUEST_PRODUCT_URL = "/product";
 
 	public static final String PRODUCT_CATEGORY_PARAM_NAME = "productCategory";
@@ -42,6 +44,11 @@ public class TestUtils {
 		}.getType();
 		Gson gson = new Gson();
 		return gson.fromJson(contentAsString, listOfProductObject);
+	}
+
+	public static CreateProductRequest createProductRequestFromProduct(Product product) {
+		return CreateProductRequest.builder().name(product.getName()).category(product.getCategory()).price(product.getPrice())
+				.imageLink(product.getImageLink()).build();
 	}
 
 }

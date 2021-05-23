@@ -1,13 +1,14 @@
 package com.dolap.product.service;
 
-import com.dolap.product.dto.ProductDTO;
-import com.dolap.product.dto.ProductRequestDTO;
 import com.dolap.product.exception.*;
 import com.dolap.product.model.Product;
 import com.dolap.product.repository.ProductRepository;
+import com.dolap.product.request.CreateProductRequest;
+import com.dolap.product.request.GetProductOfCategoryRequest;
 import com.dolap.product.strings.ValidationMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,24 +22,24 @@ import java.util.Optional;
 public class ProductService {
 	private final ProductRepository productRepository;
 
-	public Product createAndSaveProduct(ProductDTO productDTO) {
-		if (productDTO == null || productDTO.getPrice() == null || productDTO.getCategory() == null || productDTO
-				.getImageLink() == null || productDTO.getName() == null) {
+	public Product createAndSaveProduct(CreateProductRequest createProductRequest) {
+		if (createProductRequest == null || createProductRequest.getPrice() == null || createProductRequest.getCategory() == null || createProductRequest
+				.getImageLink() == null || createProductRequest.getName() == null) {
 			log.warn(ValidationMessages.NULL_PRODUCT_ATTRIBUTE_EXCEPTION);
 			throw new NullProductAttributeException();
 		}
 
-		if (productDTO.getName().isEmpty()) {
+		if (createProductRequest.getName().isEmpty()) {
 			log.warn(ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE);
 			throw new BlankNameException();
 		}
-		if (productDTO.getPrice() < 0) {
+		if (createProductRequest.getPrice() < 0) {
 			log.warn(ValidationMessages.NEGATIVE_PRICE_VALIDATION_MESSAGE);
 			throw new NegativePriceException();
 		}
 
-		Product product = Product.builder().name(productDTO.getName()).price(productDTO.getPrice())
-				.imageLink(productDTO.getImageLink()).category(productDTO.getCategory()).build();
+		Product product = Product.builder().name(createProductRequest.getName()).price(createProductRequest.getPrice())
+				.imageLink(createProductRequest.getImageLink()).category(createProductRequest.getCategory()).build();
 		log.info("creating and saving a new product : {}", product);
 		return productRepository.save(product);
 	}
@@ -68,7 +69,7 @@ public class ProductService {
 		return productRepository.save(product);
 	}
 
-	public List<Product> getProductOfCategoryWithPageNumber(ProductRequestDTO productRequest) {
+	public List<Product> getProductOfCategoryWithPageNumber(GetProductOfCategoryRequest productRequest) {
 		if (productRequest == null || productRequest.getProductCategory() == null) {
 			throw new NullProductRequestAttributeException();
 		}
@@ -80,5 +81,15 @@ public class ProductService {
 		}
 		Pageable pageable = PageRequest.of(productRequest.getPage(), productRequest.getCount());
 		return productRepository.findAllByCategory(productRequest.getProductCategory(), pageable);
+	}
+
+	public void deleteProduct(long productId) {
+		log.info("deleting product with id:  {}", productId);
+		try {
+			productRepository.deleteById(productId);
+		} catch (EmptyResultDataAccessException e) {
+			log.warn("The product with id : {} doesn't exist", productId);
+			throw new DeletingProductNotExistsException();
+		}
 	}
 }

@@ -1,7 +1,6 @@
-package com.dolap.product.dto;
+package com.dolap.product.request;
 
 import com.dolap.product.enums.ProductCategory;
-import com.dolap.product.model.Product;
 import com.dolap.product.strings.ValidationMessages;
 import lombok.*;
 
@@ -14,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @Builder
-public class ProductDTO {
+public class CreateProductRequest {
 	@NotBlank(message = ValidationMessages.BLANK_NAME_VALIDATION_MESSAGE)
 	private String name;
 
@@ -27,9 +26,4 @@ public class ProductDTO {
 
 	@NotNull
 	private String imageLink;
-
-	public static ProductDTO fromProduct(Product product) {
-		return ProductDTO.builder().name(product.getName()).category(product.getCategory()).price(product.getPrice())
-				.imageLink(product.getImageLink()).build();
-	}
 }

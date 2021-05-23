@@ -1,4 +1,4 @@
-package com.dolap.product.dto;
+package com.dolap.product.reponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,9 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter @Setter
-public class ErrorDTO {
+@Getter
+@Setter
+public class ErrorResponse {
 	private String message;
 	private List<String> details;
 

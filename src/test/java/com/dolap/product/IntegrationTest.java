@@ -1,9 +1,10 @@
 package com.dolap.product;
 
-import com.dolap.product.dto.ProductDTO;
 import com.dolap.product.enums.ProductCategory;
 import com.dolap.product.model.Product;
 import com.dolap.product.repository.ProductRepository;
+import com.dolap.product.request.CreateProductRequest;
+import com.dolap.product.request.DeleteProductRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import java.util.Optional;
 
 import static com.dolap.product.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,21 +38,21 @@ public class IntegrationTest {
 	@Test
 	@Transactional
 	public void createProduct_Successful_ShouldReturnSavedProduct() throws Exception {
-		ProductDTO productDTO = ProductDTO.builder().category(ProductCategory.HOME).price(5.0).name("test_name")
-				.imageLink("test_link").build();
-		String productDtoJSON = objectToJson(productDTO);
+		CreateProductRequest createProductRequest = CreateProductRequest.builder().category(ProductCategory.HOME)
+				.price(5.0).name("test_name").imageLink("test_link").build();
+		String createProductRequestJSON = objectToJson(createProductRequest);
 
-		MvcResult mvcResult = this.mockMvc
-				.perform(post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON).content(productDtoJSON))
+		MvcResult mvcResult = this.mockMvc.perform(
+				post(CREATE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON).content(createProductRequestJSON))
 				.andExpect(status().isCreated()).andReturn();
 
 		String contentAsString = mvcResult.getResponse().getContentAsString();
 		Product savedProduct = objectFromJson(contentAsString, Product.class);
 
-		assertEquals(productDTO.getImageLink(), savedProduct.getImageLink());
-		assertEquals(productDTO.getPrice(), savedProduct.getPrice());
-		assertEquals(productDTO.getName(), savedProduct.getName());
-		assertEquals(productDTO.getCategory(), savedProduct.getCategory());
+		assertEquals(createProductRequest.getImageLink(), savedProduct.getImageLink());
+		assertEquals(createProductRequest.getPrice(), savedProduct.getPrice());
+		assertEquals(createProductRequest.getName(), savedProduct.getName());
+		assertEquals(createProductRequest.getCategory(), savedProduct.getCategory());
 	}
 
 	@Test
@@ -96,6 +99,31 @@ public class IntegrationTest {
 		for (Product returnedProduct : returnedProducts) {
 			Assertions.assertEquals(category, returnedProduct.getCategory());
 		}
+	}
+
+	@Test
+	@Transactional
+	public void deleteProduct_Successful_ShouldReturnDeleteResponse() throws Exception {
+		long productId = 3L;
+		DeleteProductRequest deleteProductRequest = DeleteProductRequest.builder().productId(productId).build();
+
+		Optional<Product> productByIdFromDb = productRepository.findById(productId);
+		if (!productByIdFromDb.isPresent()) {
+			Product product = Product.builder().id(productId).name("test_name").price(3.0)
+					.category(ProductCategory.HOME).imageLink("test_link").build();
+			Product savedProduct = productRepository.save(product);
+			deleteProductRequest.setProductId(savedProduct.getId());
+		}
+
+		String deleteProductRequestJSON = objectToJson(deleteProductRequest);
+
+		this.mockMvc.perform(
+				delete(DELETE_PRODUCT_URL).contentType(MediaType.APPLICATION_JSON).content(deleteProductRequestJSON))
+				.andExpect(status().isOk());
+
+		Optional<Product> productAfterDelete = productRepository.findById(productId);
+		assertFalse(productAfterDelete.isPresent());
+
 	}
 
 }

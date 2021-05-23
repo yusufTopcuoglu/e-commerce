@@ -38,10 +38,10 @@ This service has following functionalities:
 POST http://localhost:8080/product/create 
 Body raw (JSON)
   {
-  "name": "product_name",
-  "price": 1,
-  "category": "ELECTRONIC",
-  "imageLink": "image_link"
+      "name": "product_name",
+      "price": 1,
+      "category": "ELECTRONIC",
+      "imageLink": "image_link"
   }
 ```
 
@@ -50,12 +50,21 @@ Body raw (JSON)
 POST http://localhost:8080/product/update 
 Body raw (JSON)
   {
-  "id": 1
-  "name": "product_name",
-  "price": 1,
-  "category": "ELECTRONIC",
-  "imageLink": "image_link"
+      "id": 1
+      "name": "product_name",
+      "price": 1,
+      "category": "ELECTRONIC",
+      "imageLink": "image_link"
   }
+```
+
+* Delete product
+``` 
+POST http://localhost:8080/product/delete 
+Body raw (JSON)
+ {
+    "productId": 1
+ }
 ```
 
 * Get product of certain category

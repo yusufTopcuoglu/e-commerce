@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "32e527ee-cb60-4292-b314-08ac15c97fb7",
-		"name": "New Collection",
+		"name": "product",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -12,7 +12,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"a\",\n    \"price\": 1,\n    \"category\": \"ELECTRONIC\",\n    \"imageLink\": \"https://cdn-gant.akinon.net/products/2020/08/12/22742/a0ea0087-aacf-4bb6-bc2d-d9eaaea57fb1_size1500x1875_quality90_cropCenter.jpg\"\n}",
+					"raw": "{\n    \"name\": \"product name\",\n    \"price\": 1,\n    \"category\": \"HOME\",\n    \"imageLink\": \"https://cdn-gant.akinon.net/products/2020/08/12/22742/a0ea0087-aacf-4bb6-bc2d-d9eaaea57fb1_size1500x1875_quality90_cropCenter.jpg\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -39,7 +39,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/product?productCategory=HOME&page=0&count=1",
+					"raw": "http://localhost:8080/product?productCategory=HOME&page=1&count=2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -55,11 +55,11 @@
 						},
 						{
 							"key": "page",
-							"value": "0"
+							"value": "1"
 						},
 						{
 							"key": "count",
-							"value": "1"
+							"value": "2"
 						}
 					]
 				}
@@ -73,7 +73,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"id\": 60,\n    \"name\": \"a\",\n    \"price\": 1,\n    \"category\": \"ELECTRONIC\",\n    \"imageLink\": \"https://cdn-gant.akinon.net/products/2020/08/12/22742/a0ea0087-aacf-4bb6-bc2d-d9eaaea57fb1_size1500x1875_quality90_cropCenter.jpg\"\n}",
+					"raw": "{\n    \"id\": 1,\n    \"name\": \"aa\",\n    \"price\": 2,\n    \"category\": \"ELECTRONIC\",\n    \"imageLink\": \"https://cdn-gant.akinon.net/products/2020/08/12/22742/a0ea0087-aacf-4bb6-bc2d-d9eaaea57fb1_size1500x1875_quality90_cropCenter.jpg\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -89,6 +89,41 @@
 					"path": [
 						"product",
 						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete product",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"productId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/product/delete",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"product",
+						"delete"
+					],
+					"query": [
+						{
+							"key": "productId",
+							"value": "-1",
+							"disabled": true
+						}
 					]
 				}
 			},
